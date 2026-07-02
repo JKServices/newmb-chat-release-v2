@@ -17,7 +17,9 @@ export default function HomePage() {
           <span>·</span>
           <a href="/terms">Terms</a>
         </nav>
-        <p>Inspired by public football interviews & football culture • Unofficial parody AI</p>
+        <p>
+          Inspired by public football interviews & football culture • Unofficial parody AI
+        </p>
         <p>v1.0</p>
       </footer>
     </main>
