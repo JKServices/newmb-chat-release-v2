@@ -189,32 +189,111 @@ function drawChatAnswerBubble(
   return y + bubbleHeight;
 }
 
+function splitAnswerForPoster(answer: string) {
+  const lines = cleanText(answer)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const keyword = lines[0] || "Reset";
+  const body = lines.slice(1).join("\n") || "오늘 경기는 아직 끝나지 않았습니다.";
+
+  return {
+    keyword,
+    body
+  };
+}
+
+function drawPosterText(
+  ctx: CanvasRenderingContext2D,
+  question: string,
+  answer: string
+) {
+  const { keyword, body } = splitAnswerForPoster(answer);
+
+  ctx.textAlign = "left";
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font =
+    "950 86px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.fillText(keyword, 70, 78);
+
+  ctx.fillStyle = "#b8b8bd";
+  ctx.font =
+    "700 27px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+
+  const questionLines = wrapText(ctx, question, 760).slice(0, 2);
+  let questionY = 205;
+
+  questionLines.forEach((line, index) => {
+    ctx.fillText(line, 70, questionY + index * 38);
+  });
+
+  const redLineY = questionY + questionLines.length * 38 + 30;
+
+  ctx.fillStyle = "#ff2d55";
+  roundRect(ctx, 70, redLineY, 180, 12, 999);
+  ctx.fill();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font =
+    "850 50px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+
+  const answerLines = wrapText(ctx, body, 760).slice(0, 6);
+  const answerLineHeight = 66;
+  const answerStartY = redLineY + 58;
+
+  answerLines.forEach((line, index) => {
+    ctx.fillText(line, 70, answerStartY + index * answerLineHeight);
+  });
+
+  ctx.fillStyle = "#8e8e93";
+  ctx.font =
+    "700 26px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.fillText("newmb.chat · 비공식 패러디", 70, 820);
+}
+
+function drawKakaoInputBar(ctx: CanvasRenderingContext2D, y: number) {
+  ctx.fillStyle = "rgba(244, 246, 248, 0.96)";
+  ctx.fillRect(0, y, 900, 84);
+
+  ctx.fillStyle = "#7b8794";
+  ctx.font =
+    "500 34px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("+", 44, y + 21);
+
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#ffffff";
+  roundRect(ctx, 86, y + 16, 660, 52, 26);
+  ctx.fill();
+
+  ctx.fillStyle = "#a0a5aa";
+  ctx.font =
+    "500 20px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.fillText("메시지 입력", 110, y + 31);
+
+  ctx.fillStyle = "#7b8794";
+  ctx.font =
+    "700 22px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.fillText("전송", 780, y + 30);
+
+  ctx.textAlign = "left";
+}
+
 export default function MemeActions({ question, answer }: MemeActionsProps) {
   function makePosterImage() {
-    const { canvas, ctx } = setupCanvas(900, 1200);
+    const { canvas, ctx } = setupCanvas(900, 900);
 
     ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, 900, 1200);
+    ctx.fillRect(0, 0, 900, 900);
 
-    ctx.fillStyle = "#ffffff";
-    ctx.font =
-      "900 42px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
-    ctx.fillText("뉴MB.chat", 64, 64);
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
+    ctx.lineWidth = 2;
+    roundRect(ctx, 1, 1, 898, 898, 62);
+    ctx.stroke();
 
-    const afterQuestionY = drawQuestionBubble(ctx, question, 900, 170, {
-      maxBubbleWidth: 420,
-      fontSize: 21
-    });
-
-    drawNewMbProfile(ctx, 64, afterQuestionY);
-
-    drawChatAnswerBubble(ctx, answer, 122, afterQuestionY + 44, 650, true);
-
-    ctx.fillStyle = "#8e8e93";
-    ctx.font =
-      "700 22px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("newmb.chat", 450, 1135);
+    drawPosterText(ctx, question, answer);
 
     downloadCanvas(canvas, "newmb-poster.png");
   }
@@ -251,13 +330,17 @@ export default function MemeActions({ question, answer }: MemeActionsProps) {
       false
     );
 
-    const finalHeight = Math.min(1200, Math.max(650, answerBottom + 92));
+    const watermarkY = answerBottom + 20;
+    const inputY = watermarkY + 34;
+    const finalHeight = Math.min(1200, Math.max(680, inputY + 84));
 
-    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    ctx.fillStyle = "rgba(0,0,0,0.42)";
     ctx.font =
-      "700 21px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+      "700 19px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("newmb.chat", 450, finalHeight - 50);
+    ctx.fillText("newmb.chat", 450, watermarkY);
+
+    drawKakaoInputBar(ctx, inputY);
 
     const croppedCanvas = cropCanvas(canvas, 900, finalHeight, scale);
 
