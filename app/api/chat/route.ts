@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createLocalReply } from "@/lib/local-replies";
 import { NEWMB_SYSTEM_PROMPT } from "@/lib/newmb-prompt";
 import { getOpenAIClient } from "@/lib/openai-client";
+import { findReplyInDb } from "@/lib/reply-db";
 
 export const runtime = "nodejs";
 
@@ -53,6 +54,16 @@ export async function POST(request: Request) {
           status: 400
         }
       );
+    }
+
+    const dbReply = findReplyInDb(question);
+
+    if (dbReply) {
+      return NextResponse.json({
+        answer: dbReply.answer,
+        source: "db",
+        scenario: dbReply.scenario
+      });
     }
 
     const client = getOpenAIClient();
