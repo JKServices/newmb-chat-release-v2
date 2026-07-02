@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
-import { createLocalReply } from "@/lib/local-replies";
 import MemeActions from "./MemeActions";
 
 type ChatMessage = {
@@ -31,12 +30,18 @@ export default function Chat() {
     {
       id: makeId(),
       role: "bot",
-      content: "Reset\n\n오늘 경기는 아직 끝나지 않았습니다.\n다음 플레이 준비하세요.\n폼은 돌아옵니다."
+      content:
+        "Reset\n\n오늘 경기는 아직 끝나지 않았습니다.\n다음 플레이 준비하세요.\n폼은 돌아옵니다."
     }
   ]);
+
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const [loadingDots, setLoadingDots] = useState(".");
+  const [latestPair, setLatestPair] = useState<{
+    question: string;
+    answer: string;
+  } | null>(null);
 
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -76,12 +81,34 @@ export default function Chat() {
         content: question
       }
     ]);
+
     setInput("");
     setIsThinking(true);
 
     await new Promise((resolve) => window.setTimeout(resolve, 2000));
 
-    const reply = createLocalReply(question);
+    let reply =
+      "Reset\n\n지금은 연결이 흔들립니다.\n다음 플레이 준비하겠습니다.";
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ question })
+      });
+
+      const data = (await response.json()) as {
+        answer?: string;
+      };
+
+      if (data.answer) {
+        reply = data.answer;
+      }
+    } catch {
+      reply = "Recover\n\n잠깐 끊겼습니다.\n하지만 경기는 계속됩니다.";
+    }
 
     setMessages((current) => [
       ...current,
@@ -91,6 +118,11 @@ export default function Chat() {
         content: reply
       }
     ]);
+
+    setLatestPair({
+      question,
+      answer: reply
+    });
 
     setIsThinking(false);
   }
@@ -143,6 +175,13 @@ export default function Chat() {
           {isThinking ? "감독님께 전달 중..." : "뉴MB에게 질문하기"}
         </button>
       </form>
+
+      {latestPair ? (
+        <MemeActions
+          question={latestPair.question}
+          answer={latestPair.answer}
+        />
+      ) : null}
     </section>
   );
 }
