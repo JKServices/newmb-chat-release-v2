@@ -37,17 +37,23 @@ function drawQuestionBubble(
   ctx: CanvasRenderingContext2D,
   question: string,
   canvasWidth: number,
-  startY: number
+  startY: number,
+  options?: {
+    maxBubbleWidth?: number;
+    fontSize?: number;
+    paddingX?: number;
+    paddingY?: number;
+  }
 ) {
-  const maxBubbleWidth = 420;
-  const paddingX = 18;
-  const paddingY = 13;
+  const maxBubbleWidth = options?.maxBubbleWidth ?? 420;
+  const paddingX = options?.paddingX ?? 18;
+  const paddingY = options?.paddingY ?? 13;
+  const fontSize = options?.fontSize ?? 21;
 
-  ctx.font =
-    "600 21px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif`;
 
   const lines = wrapText(ctx, question, maxBubbleWidth - paddingX * 2);
-  const lineHeight = 31;
+  const lineHeight = Math.round(fontSize * 1.45);
   const bubbleHeight = lines.length * lineHeight + paddingY * 2;
   const widestLine = Math.max(
     ...lines.map((line) => ctx.measureText(line).width),
@@ -55,7 +61,7 @@ function drawQuestionBubble(
   );
   const bubbleWidth = Math.min(maxBubbleWidth, widestLine + paddingX * 2);
 
-  const x = canvasWidth - bubbleWidth - 44;
+  const x = canvasWidth - bubbleWidth - 48;
   const y = startY;
 
   ctx.fillStyle = "#6bbcff";
@@ -73,7 +79,8 @@ function drawQuestionBubble(
 function drawNewMbProfile(
   ctx: CanvasRenderingContext2D,
   x: number,
-  y: number
+  y: number,
+  darkText = false
 ) {
   ctx.fillStyle = "#1c1c1e";
   ctx.beginPath();
@@ -86,18 +93,18 @@ function drawNewMbProfile(
 
   ctx.fillStyle = "#ffffff";
   ctx.font =
-    "800 15px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+    "900 15px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
   ctx.textAlign = "center";
   ctx.fillText("뉴", x + 23, y + 13);
   ctx.textAlign = "left";
 
-  ctx.fillStyle = "#d1d1d6";
+  ctx.fillStyle = darkText ? "#111111" : "#d1d1d6";
   ctx.font =
-    "700 18px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+    "800 18px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
   ctx.fillText("뉴MB", x + 58, y + 1);
 }
 
-function drawAnswerBubble(
+function drawChatAnswerBubble(
   ctx: CanvasRenderingContext2D,
   answer: string,
   x: number,
@@ -137,7 +144,7 @@ function drawAnswerBubble(
   wrappedLines.forEach((line, index) => {
     if (index === 0) {
       ctx.font =
-        "800 30px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+        "900 30px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
     } else {
       ctx.font =
         "500 23px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
@@ -149,6 +156,71 @@ function drawAnswerBubble(
   return y + bubbleHeight;
 }
 
+function splitAnswerForPoster(answer: string) {
+  const cleaned = cleanText(answer);
+  const lines = cleaned
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const title = lines[0] || "Reset";
+  const body = lines.slice(1).join("\n") || "오늘 경기는 아직 끝나지 않았습니다.";
+
+  return {
+    title,
+    body
+  };
+}
+
+function drawPosterText(
+  ctx: CanvasRenderingContext2D,
+  answer: string,
+  width: number
+) {
+  const { title, body } = splitAnswerForPoster(answer);
+
+  ctx.textAlign = "center";
+
+  ctx.fillStyle = "#6bbcff";
+  ctx.font =
+    "900 42px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.fillText(title.toUpperCase(), width / 2, 210);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font =
+    "950 74px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+
+  const bodyLines = wrapText(ctx, body, 700);
+  const bigLines = bodyLines.slice(0, 5);
+  const lineHeight = 88;
+  const totalHeight = bigLines.length * lineHeight;
+  const startY = 385 - totalHeight / 2;
+
+  bigLines.forEach((line, index) => {
+    ctx.fillText(line, width / 2, startY + index * lineHeight);
+  });
+
+  ctx.fillStyle = "#8e8e93";
+  ctx.font =
+    "700 24px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.fillText("UNOFFICIAL PARODY AI", width / 2, 760);
+
+  ctx.fillStyle = "rgba(255,255,255,0.12)";
+  ctx.fillRect(150, 815, 600, 1);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font =
+    "900 44px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.fillText("뉴MB.chat", width / 2, 865);
+
+  ctx.fillStyle = "#8e8e93";
+  ctx.font =
+    "600 22px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.fillText("newmb.chat", width / 2, 1135);
+
+  ctx.textAlign = "left";
+}
+
 export default function MemeActions({ question, answer }: MemeActionsProps) {
   function makePosterImage() {
     const { canvas, ctx } = setupCanvas(900, 1200);
@@ -156,22 +228,29 @@ export default function MemeActions({ question, answer }: MemeActionsProps) {
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, 900, 1200);
 
-    ctx.fillStyle = "#ffffff";
-    ctx.font =
-      "800 42px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
-    ctx.fillText("뉴MB.chat", 64, 64);
+    ctx.fillStyle = "rgba(107,188,255,0.12)";
+    ctx.beginPath();
+    ctx.arc(450, 130, 310, 0, Math.PI * 2);
+    ctx.fill();
 
-    const afterQuestionY = drawQuestionBubble(ctx, question, 900, 170);
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.beginPath();
+    ctx.arc(450, 400, 520, 0, Math.PI * 2);
+    ctx.fill();
 
-    drawNewMbProfile(ctx, 64, afterQuestionY);
-
-    drawAnswerBubble(ctx, answer, 122, afterQuestionY + 44, 650, true);
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
+    ctx.lineWidth = 2;
+    roundRect(ctx, 42, 42, 816, 1116, 38);
+    ctx.stroke();
 
     ctx.fillStyle = "#8e8e93";
     ctx.font =
-      "600 22px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+      "800 20px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("newmb.chat", 450, 1135);
+    ctx.fillText(question.slice(0, 46), 450, 92);
+    ctx.textAlign = "left";
+
+    drawPosterText(ctx, answer, 900);
 
     downloadCanvas(canvas, "newmb-poster.png");
   }
@@ -187,20 +266,23 @@ export default function MemeActions({ question, answer }: MemeActionsProps) {
 
     ctx.fillStyle = "#111111";
     ctx.font =
-      "800 30px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+      "900 30px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("뉴MB", 450, 32);
     ctx.textAlign = "left";
 
-    const afterQuestionY = drawQuestionBubble(ctx, question, 900, 150);
+    const afterQuestionY = drawQuestionBubble(ctx, question, 900, 150, {
+      maxBubbleWidth: 430,
+      fontSize: 21
+    });
 
-    drawNewMbProfile(ctx, 54, afterQuestionY);
+    drawNewMbProfile(ctx, 54, afterQuestionY, true);
 
-    drawAnswerBubble(ctx, answer, 112, afterQuestionY + 44, 650, false);
+    drawChatAnswerBubble(ctx, answer, 112, afterQuestionY + 44, 650, false);
 
     ctx.fillStyle = "rgba(0,0,0,0.45)";
     ctx.font =
-      "600 22px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+      "700 22px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("newmb.chat", 450, 1135);
 
