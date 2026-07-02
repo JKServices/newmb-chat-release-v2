@@ -2,32 +2,31 @@ import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://newmb.chat";
-  const now = new Date();
 
   return [
     {
       url: baseUrl,
-      lastModified: now,
-      changeFrequency: "daily",
+      lastModified: new Date(),
+      changeFrequency: "weekly",
       priority: 1
     },
     {
       url: `${baseUrl}/about`,
-      lastModified: now,
+      lastModified: new Date(),
       changeFrequency: "monthly",
-      priority: 0.5
+      priority: 0.7
     },
     {
       url: `${baseUrl}/privacy`,
-      lastModified: now,
+      lastModified: new Date(),
       changeFrequency: "monthly",
-      priority: 0.4
+      priority: 0.6
     },
     {
       url: `${baseUrl}/terms`,
-      lastModified: now,
+      lastModified: new Date(),
       changeFrequency: "monthly",
-      priority: 0.4
+      priority: 0.6
     }
   ];
 }
