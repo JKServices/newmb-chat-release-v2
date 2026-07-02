@@ -33,25 +33,30 @@ function setupCanvas(width: number, height: number) {
   return { canvas, ctx, scale };
 }
 
-function cropCanvas(
+function cropRoundedCanvas(
   sourceCanvas: HTMLCanvasElement,
   width: number,
   height: number,
-  scale: number
+  scale: number,
+  radius: number
 ) {
-  const croppedCanvas = document.createElement("canvas");
-  croppedCanvas.width = width * scale;
-  croppedCanvas.height = height * scale;
-  croppedCanvas.style.width = `${width}px`;
-  croppedCanvas.style.height = `${height}px`;
+  const roundedCanvas = document.createElement("canvas");
+  roundedCanvas.width = width * scale;
+  roundedCanvas.height = height * scale;
+  roundedCanvas.style.width = `${width}px`;
+  roundedCanvas.style.height = `${height}px`;
 
-  const croppedCtx = croppedCanvas.getContext("2d");
+  const roundedCtx = roundedCanvas.getContext("2d");
 
-  if (!croppedCtx) {
+  if (!roundedCtx) {
     return sourceCanvas;
   }
 
-  croppedCtx.drawImage(
+  roundedCtx.scale(scale, scale);
+  roundRect(roundedCtx, 0, 0, width, height, radius);
+  roundedCtx.clip();
+
+  roundedCtx.drawImage(
     sourceCanvas,
     0,
     0,
@@ -59,11 +64,11 @@ function cropCanvas(
     height * scale,
     0,
     0,
-    width * scale,
-    height * scale
+    width,
+    height
   );
 
-  return croppedCanvas;
+  return roundedCanvas;
 }
 
 function drawQuestionBubble(
@@ -219,34 +224,35 @@ function drawPoster(
   roundRect(ctx, 1, 1, 898, 898, 62);
   ctx.stroke();
 
-  // Question at top
-  ctx.fillStyle = "#b8b8bd";
+  ctx.fillStyle = "#ffffff";
   ctx.font =
-    "700 27px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+    "850 38px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
 
   const questionLines = wrapText(ctx, question, 760).slice(0, 3);
-  const questionStartY = 84;
+  const questionStartY = 78;
+  const questionLineHeight = 52;
 
   questionLines.forEach((line, index) => {
-    ctx.fillText(line, 70, questionStartY + index * 38);
+    ctx.fillText(line, 70, questionStartY + index * questionLineHeight);
   });
 
-  // Red line below question
-  const redLineY = questionStartY + questionLines.length * 38 + 28;
+  const redLineY =
+    questionStartY + questionLines.length * questionLineHeight + 30;
+
   ctx.fillStyle = "#ff2d55";
   roundRect(ctx, 70, redLineY, 180, 12, 999);
   ctx.fill();
 
-  // Keyword below red line
   const keywordY = redLineY + 42;
+
   ctx.fillStyle = "#ffffff";
   ctx.font =
     "950 82px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
   ctx.fillText(keyword, 70, keywordY);
 
-  // Answer below keyword
   ctx.font =
     "850 50px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+
   const answerLines = wrapText(ctx, body, 760).slice(0, 6);
   const answerStartY = keywordY + 110;
   const answerLineHeight = 66;
@@ -255,7 +261,6 @@ function drawPoster(
     ctx.fillText(line, 70, answerStartY + index * answerLineHeight);
   });
 
-  // Watermark
   ctx.fillStyle = "#8e8e93";
   ctx.font =
     "700 26px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
@@ -293,7 +298,9 @@ function drawKakaoInputBar(ctx: CanvasRenderingContext2D, y: number) {
 export default function MemeActions({ question, answer }: MemeActionsProps) {
   function makePosterImage() {
     const { canvas, ctx } = setupCanvas(900, 900);
+
     drawPoster(ctx, question, answer);
+
     downloadCanvas(canvas, "newmb-poster.png");
   }
 
@@ -341,9 +348,9 @@ export default function MemeActions({ question, answer }: MemeActionsProps) {
 
     drawKakaoInputBar(ctx, inputY);
 
-    const croppedCanvas = cropCanvas(canvas, 900, finalHeight, scale);
+    const roundedCanvas = cropRoundedCanvas(canvas, 900, finalHeight, scale, 42);
 
-    downloadCanvas(croppedCanvas, "newmb-kakao.png");
+    downloadCanvas(roundedCanvas, "newmb-kakao.png");
   }
 
   return (
