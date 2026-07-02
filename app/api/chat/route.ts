@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createLocalReply } from "@/lib/local-replies";
-import { getOpenAIClient } from "@/lib/openai-client";
 import { NEWMB_SYSTEM_PROMPT } from "@/lib/newmb-prompt";
+import { getOpenAIClient } from "@/lib/openai-client";
 
 export const runtime = "nodejs";
 
@@ -20,11 +20,23 @@ function sanitizeQuestion(value: unknown) {
 }
 
 function sanitizeAnswer(value: string) {
-  return value
+  const cleaned = value
     .replace(/\\n/g, "\n")
+    .replace(/\r/g, "")
+    .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{4,}/g, "\n\n")
-    .trim()
-    .slice(0, 800);
+    .trim();
+
+  const lines = cleaned
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .slice(0, 8);
+
+  return lines.join("\n").slice(0, 700);
+}
+
+function fallbackAnswer(question: string) {
+  return createLocalReply(question);
 }
 
 export async function POST(request: Request) {
@@ -34,8 +46,12 @@ export async function POST(request: Request) {
 
     if (!question) {
       return NextResponse.json(
-        { error: "Question is required." },
-        { status: 400 }
+        {
+          error: "Question is required."
+        },
+        {
+          status: 400
+        }
       );
     }
 
@@ -43,7 +59,7 @@ export async function POST(request: Request) {
 
     if (!client) {
       return NextResponse.json({
-        answer: createLocalReply(question),
+        answer: fallbackAnswer(question),
         source: "local"
       });
     }
@@ -52,13 +68,16 @@ export async function POST(request: Request) {
       model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
       instructions: NEWMB_SYSTEM_PROMPT,
       input: question,
-      max_output_tokens: 180
+      max_output_tokens: 180,
+      temperature: 0.95
     });
 
-    const answer =
-      typeof response.output_text === "string" && response.output_text.trim()
-        ? sanitizeAnswer(response.output_text)
-        : createLocalReply(question);
+    const generatedText =
+      typeof response.output_text === "string" ? response.output_text : "";
+
+    const answer = generatedText.trim()
+      ? sanitizeAnswer(generatedText)
+      : fallbackAnswer(question);
 
     return NextResponse.json({
       answer,
@@ -67,13 +86,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Chat API error:", error);
 
-    return NextResponse.json(
-      {
-        answer:
-          "Reset\n\n지금은 연결이 흔들립니다.\n전술판 다시 보고 오겠습니다.",
-        source: "fallback"
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      answer:
+        "Reset\n\n지금은 연결이 흔들립니다.\n하지만 경기는 계속됩니다.\n다음 플레이 준비하세요.",
+      source: "fallback"
+    });
   }
 }
