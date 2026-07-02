@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
 import { createLocalReply } from "@/lib/local-replies";
+import MemeActions from "./MemeActions";
 
 type ChatMessage = {
   id: string;
