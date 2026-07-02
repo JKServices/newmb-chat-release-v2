@@ -31,7 +31,7 @@ export default function Chat() {
       id: makeId(),
       role: "bot",
       content:
-        "Reset\n\n오늘 경기는 아직 끝나지 않았습니다.\n다음 플레이 준비하세요.\n폼은 돌아옵니다."
+        "Reset\n\n오늘 경기는 아직 끝나지 않았습니다.\n폼은 돌아옵니다.\n다음 플레이 준비하세요."
     }
   ]);
 
@@ -88,7 +88,7 @@ export default function Chat() {
     await new Promise((resolve) => window.setTimeout(resolve, 2000));
 
     let reply =
-      "Reset\n\n지금은 연결이 흔들립니다.\n다음 플레이 준비하겠습니다.";
+      "Reset\n\n지금은 연결이 흔들립니다.\n그래도 경기는 계속됩니다.\n다음 플레이 준비하세요.";
 
     try {
       const response = await fetch("/api/chat", {
@@ -107,7 +107,7 @@ export default function Chat() {
         reply = data.answer;
       }
     } catch {
-      reply = "Recover\n\n잠깐 끊겼습니다.\n하지만 경기는 계속됩니다.";
+      reply = "Recover\n\n잠깐 끊겼습니다.\n하지만 아직 후반전 남았습니다.";
     }
 
     setMessages((current) => [
@@ -128,53 +128,67 @@ export default function Chat() {
   }
 
   return (
-    <section className="chat-app" aria-label="뉴MB chat">
-      <header className="chat-header">
-        <div>
-          <h1>뉴MB.chat</h1>
-          <p>오늘도 질문 있습니까?</p>
-        </div>
-      </header>
-
-      <div className="chat-window">
-        {messages.map((message) => (
-          <MessageBubble
-            key={message.id}
-            role={message.role}
-            content={message.content}
-          />
-        ))}
-
-        {isThinking ? (
-          <MessageBubble
-            role="loading"
-            content={`감독님께 전달 중${loadingDots}`}
-          />
-        ) : null}
-
-        <div ref={chatEndRef} />
+    <section className="hero-chat" aria-label="뉴MB chat">
+      <div className="hero-top">
+        <p className="eyebrow">Unofficial parody AI</p>
+        <h1>뉴MB.chat</h1>
+        <p className="hero-copy">
+          인생의 애매한 장면을 감독님 인터뷰 톤으로 정리합니다.
+        </p>
       </div>
 
-      <form className="chat-form" onSubmit={handleSubmit}>
-        <textarea
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          placeholder={placeholder}
-          rows={1}
-          maxLength={120}
-          disabled={isThinking}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey) {
-              event.preventDefault();
-              event.currentTarget.form?.requestSubmit();
-            }
-          }}
-        />
+      <div className="phone-frame">
+        <div className="phone-topbar">
+          <div>
+            <p className="phone-title">뉴MB</p>
+            <p className="phone-status">경기 후 인터뷰 대기 중</p>
+          </div>
+          <div className="phone-mark">뉴</div>
+        </div>
 
-        <button type="submit" disabled={isThinking || input.trim().length === 0}>
-          {isThinking ? "감독님께 전달 중..." : "뉴MB에게 질문하기"}
-        </button>
-      </form>
+        <div className="chat-window">
+          {messages.map((message) => (
+            <MessageBubble
+              key={message.id}
+              role={message.role}
+              content={message.content}
+            />
+          ))}
+
+          {isThinking ? (
+            <MessageBubble
+              role="loading"
+              content={`감독님께 전달 중${loadingDots}`}
+            />
+          ) : null}
+
+          <div ref={chatEndRef} />
+        </div>
+
+        <form className="chat-form" onSubmit={handleSubmit}>
+          <textarea
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder={placeholder}
+            rows={1}
+            maxLength={120}
+            disabled={isThinking}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              }
+            }}
+          />
+
+          <button
+            type="submit"
+            disabled={isThinking || input.trim().length === 0}
+          >
+            {isThinking ? "감독님께 전달 중..." : "뉴MB에게 질문하기"}
+          </button>
+        </form>
+      </div>
 
       {latestPair ? (
         <MemeActions
