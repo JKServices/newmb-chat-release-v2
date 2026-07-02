@@ -3,6 +3,7 @@ import { createLocalReply } from "@/lib/local-replies";
 import { NEWMB_SYSTEM_PROMPT } from "@/lib/newmb-prompt";
 import { getOpenAIClient } from "@/lib/openai-client";
 import { findReplyInDb } from "@/lib/reply-db";
+import { checkChatRateLimit, makeRateLimitHeaders } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -40,8 +41,71 @@ function fallbackAnswer(question: string) {
   return createLocalReply(question);
 }
 
+function makeRateLimitAnswer(reason?: "hourly" | "burst") {
+  if (reason === "hourly") {
+    return [
+      "오늘 인터뷰는 여기까지입니다.",
+      "",
+      "한 시간에 질문은 10개까지입니다.",
+      "잠시 라커룸에서 정비하고 오겠습니다."
+    ].join("\n");
+  }
+
+  return [
+    "잠시 템포를 낮추겠습니다.",
+    "",
+    "압박이 너무 강합니다.",
+    "조금만 천천히 들어오세요."
+  ].join("\n");
+}
+
 export async function POST(request: Request) {
   try {
+    const contentType = request.headers.get("content-type") || "";
+
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json(
+        {
+          answer:
+            "Review\n\n요청 형식이 맞지 않습니다.\n전술지부터 다시 확인하겠습니다.",
+          source: "blocked"
+        },
+        {
+          status: 415
+        }
+      );
+    }
+
+    const contentLength = Number(request.headers.get("content-length") || "0");
+
+    if (contentLength > 4096) {
+      return NextResponse.json(
+        {
+          answer:
+            "Too Long\n\n질문이 너무 깁니다.\n감독님 인터뷰는 짧을수록 강합니다.",
+          source: "blocked"
+        },
+        {
+          status: 413
+        }
+      );
+    }
+
+    const rateLimit = checkChatRateLimit(request);
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          answer: makeRateLimitAnswer(rateLimit.reason),
+          source: "rate-limit"
+        },
+        {
+          status: 429,
+          headers: makeRateLimitHeaders(rateLimit)
+        }
+      );
+    }
+
     const body = (await request.json()) as ChatRequest;
     const question = sanitizeQuestion(body.question);
 
