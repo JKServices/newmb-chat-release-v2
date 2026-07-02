@@ -1,6 +1,11 @@
 "use client";
 
-import { cleanText, downloadCanvas, roundRect, wrapText } from "@/lib/image-utils";
+import {
+  cleanText,
+  downloadCanvas,
+  roundRect,
+  wrapText
+} from "@/lib/image-utils";
 
 type MemeActionsProps = {
   question: string;
@@ -44,7 +49,10 @@ function drawQuestionBubble(
   const lines = wrapText(ctx, question, maxBubbleWidth - paddingX * 2);
   const lineHeight = 31;
   const bubbleHeight = lines.length * lineHeight + paddingY * 2;
-  const widestLine = Math.max(...lines.map((line) => ctx.measureText(line).width), 80);
+  const widestLine = Math.max(
+    ...lines.map((line) => ctx.measureText(line).width),
+    80
+  );
   const bubbleWidth = Math.min(maxBubbleWidth, widestLine + paddingX * 2);
 
   const x = canvasWidth - bubbleWidth - 44;
@@ -97,13 +105,16 @@ function drawAnswerBubble(
   maxWidth: number,
   darkMode: boolean
 ) {
-  ctx.font =
-    "700 28px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
-
-  const lines = cleanText(answer).split("\n");
+  const cleanAnswer = cleanText(answer);
+  const rawLines = cleanAnswer.split("\n");
   const wrappedLines: string[] = [];
 
-  lines.forEach((line, index) => {
+  rawLines.forEach((line, index) => {
+    if (!line.trim()) {
+      wrappedLines.push("");
+      return;
+    }
+
     if (index === 0) {
       wrappedLines.push(line);
       return;
