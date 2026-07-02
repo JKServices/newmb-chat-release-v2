@@ -11,6 +11,7 @@ export default function MessageBubble({ role, content }: MessageBubbleProps) {
   const isUser = role === "user";
   const isBot = role === "bot" || role === "loading";
   const cleaned = cleanText(content);
+  const lines = cleaned.split("\n");
 
   return (
     <div className={`message-row ${isUser ? "user" : "bot"}`}>
@@ -23,16 +24,20 @@ export default function MessageBubble({ role, content }: MessageBubbleProps) {
       <div className={isBot ? "bot-stack" : undefined}>
         {isBot ? <div className="sender">뉴MB</div> : null}
 
-        <div className={`bubble ${isUser ? "user-bubble" : "bot-bubble"} ${role === "loading" ? "loading-bubble" : ""}`}>
-          {cleaned.split("\n").map((line, index) => {
-            const isEmpty = line.trim().length === 0;
+        <div
+          className={`bubble ${isUser ? "user-bubble" : "bot-bubble"} ${
+            role === "loading" ? "loading-bubble" : ""
+          }`}
+        >
+          {lines.map((line, index) => {
+            if (line.trim().length === 0) {
+              return <br key={`empty-${index}`} />;
+            }
 
-            return isEmpty ? (
-              <br key={`br-${index}`} />
-            ) : (
+            return (
               <span key={`${line}-${index}`}>
                 {line}
-                {index < cleaned.split("\n").length - 1 ? <br /> : null}
+                {index < lines.length - 1 ? <br /> : null}
               </span>
             );
           })}
