@@ -17,7 +17,7 @@ export default function MessageBubble({ role, content }: MessageBubbleProps) {
     <div className={`message-row ${isUser ? "user" : "bot"}`}>
       {isBot ? (
         <div className="profile" aria-hidden="true">
-          뉴
+          MB
         </div>
       ) : null}
 
