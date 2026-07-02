@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
 import MemeActions from "./MemeActions";
 
@@ -9,17 +9,6 @@ type ChatMessage = {
   role: "user" | "bot";
   content: string;
 };
-
-const placeholders = [
-  "감독님, 연애도 전술입니까?",
-  "오늘도 Fight입니까?",
-  "퇴사해도 될까요?",
-  "인생도 압박 축구입니까?",
-  "감독님, 오늘 경기 왜 졌나요?",
-  "VAR 같은 하루였습니다.",
-  "폼이 안 돌아옵니다.",
-  "책임은 누가 집니까?"
-];
 
 function makeId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -31,7 +20,7 @@ export default function Chat() {
       id: makeId(),
       role: "bot",
       content:
-        "Reset\n\n오늘 경기는 아직 끝나지 않았습니다.\n폼은 돌아옵니다.\n다음 플레이 준비하세요."
+        "Reset\n\n오늘 경기 졌다고\n시즌이 끝난 건 아닙니다.\n폼은 돌아옵니다."
     }
   ]);
 
@@ -44,10 +33,6 @@ export default function Chat() {
   } | null>(null);
 
   const chatEndRef = useRef<HTMLDivElement | null>(null);
-
-  const placeholder = useMemo(() => {
-    return placeholders[Math.floor(Math.random() * placeholders.length)];
-  }, []);
 
   useEffect(() => {
     if (!isThinking) return;
@@ -132,9 +117,6 @@ export default function Chat() {
       <div className="hero-top">
         <p className="eyebrow">Unofficial parody AI</p>
         <h1>뉴MB.chat</h1>
-        <p className="hero-copy">
-          인생의 애매한 장면을 감독님 인터뷰 톤으로 정리합니다.
-        </p>
       </div>
 
       <div className="phone-frame">
@@ -143,7 +125,7 @@ export default function Chat() {
             <p className="phone-title">뉴MB</p>
             <p className="phone-status">경기 후 인터뷰 대기 중</p>
           </div>
-          <div className="phone-mark">뉴</div>
+          <div className="phone-mark">MB</div>
         </div>
 
         <div className="chat-window">
@@ -169,7 +151,7 @@ export default function Chat() {
           <textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder={placeholder}
+            placeholder="질문을 입력하세요"
             rows={1}
             maxLength={120}
             disabled={isThinking}
