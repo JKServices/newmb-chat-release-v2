@@ -1,17 +1,67 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+const siteUrl = "https://newmb.chat";
+const siteName = "뉴MB.chat";
+const description =
+  "뉴MB.chat is an unofficial parody AI inspired by public football interviews and football culture.";
+
 export const metadata: Metadata = {
-  title: "뉴MB.chat",
-  description: "Unofficial parody AI chat inspired by public football interviews and football culture.",
-  metadataBase: new URL("https://newmb.chat"),
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: siteName,
+    template: `%s | ${siteName}`
+  },
+  description,
+  applicationName: siteName,
+  keywords: [
+    "뉴MB.chat",
+    "newmb.chat",
+    "parody AI",
+    "football parody",
+    "Korean football meme",
+    "AI chat"
+  ],
+  authors: [{ name: siteName }],
+  creator: siteName,
+  publisher: siteName,
+  alternates: {
+    canonical: "/"
+  },
   openGraph: {
-    title: "뉴MB.chat",
-    description: "오늘도 질문 있습니까?",
-    url: "https://newmb.chat",
-    siteName: "뉴MB.chat",
-    type: "website"
+    title: siteName,
+    description,
+    url: siteUrl,
+    siteName,
+    type: "website",
+    locale: "ko_KR",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "뉴MB.chat"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description,
+    images: ["/twitter-image"]
+  },
+  icons: {
+    icon: "/icon",
+    shortcut: "/icon",
+    apple: "/apple-icon"
   }
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#000000"
 };
 
 export default function RootLayout({
