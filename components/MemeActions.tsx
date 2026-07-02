@@ -194,18 +194,40 @@ function drawChatAnswerBubble(
   return y + bubbleHeight;
 }
 
+function isEnglishKeyword(value: string) {
+  const cleaned = value.trim();
+
+  if (!cleaned) return false;
+  if (cleaned.length > 18) return false;
+
+  return /^[A-Za-z][A-Za-z\s-]*$/.test(cleaned);
+}
+
 function splitAnswerForPoster(answer: string) {
   const lines = cleanText(answer)
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
 
-  const keyword = lines[0] || "Reset";
-  const body = lines.slice(1).join("\n") || "오늘 경기는 아직 끝나지 않았습니다.";
+  if (lines.length === 0) {
+    return {
+      keyword: null,
+      body: "오늘 경기는 아직 끝나지 않았습니다."
+    };
+  }
+
+  const firstLine = lines[0];
+
+  if (isEnglishKeyword(firstLine)) {
+    return {
+      keyword: firstLine,
+      body: lines.slice(1).join("\n") || "오늘 경기는 아직 끝나지 않았습니다."
+    };
+  }
 
   return {
-    keyword,
-    body
+    keyword: null,
+    body: lines.join("\n")
   };
 }
 
@@ -243,18 +265,22 @@ function drawPoster(
   roundRect(ctx, 70, redLineY, 180, 12, 999);
   ctx.fill();
 
-  const keywordY = redLineY + 42;
+  let answerStartY = redLineY + 52;
 
   ctx.fillStyle = "#ffffff";
-  ctx.font =
-    "950 82px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
-  ctx.fillText(keyword, 70, keywordY);
+
+  if (keyword) {
+    ctx.font =
+      "950 82px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+    ctx.fillText(keyword, 70, answerStartY);
+
+    answerStartY += 110;
+  }
 
   ctx.font =
     "850 50px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
 
-  const answerLines = wrapText(ctx, body, 760).slice(0, 6);
-  const answerStartY = keywordY + 110;
+  const answerLines = wrapText(ctx, body, 760).slice(0, keyword ? 6 : 7);
   const answerLineHeight = 66;
 
   answerLines.forEach((line, index) => {
