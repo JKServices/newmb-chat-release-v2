@@ -31,7 +31,9 @@ export function wrapText(
       }
     }
 
-    if (currentLine) lines.push(currentLine);
+    if (currentLine) {
+      lines.push(currentLine);
+    }
   }
 
   return lines;
@@ -52,7 +54,7 @@ export function roundRect(
   ctx.arcTo(x + width, y, x + width, y + height, r);
   ctx.arcTo(x + width, y + height, x, y + height, r);
   ctx.arcTo(x, y + height, x, y, r);
-  ctx.arcTo(x, y, x + width, y, r);
+  ctx.arcTo(x, y, x + r, y, r);
   ctx.closePath();
 }
 
