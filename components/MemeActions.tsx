@@ -204,49 +204,58 @@ function splitAnswerForPoster(answer: string) {
   };
 }
 
-function drawPosterText(
+function drawPoster(
   ctx: CanvasRenderingContext2D,
   question: string,
   answer: string
 ) {
   const { keyword, body } = splitAnswerForPoster(answer);
 
-  ctx.textAlign = "left";
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, 900, 900);
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font =
-    "950 86px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
-  ctx.fillText(keyword, 70, 78);
+  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.lineWidth = 2;
+  roundRect(ctx, 1, 1, 898, 898, 62);
+  ctx.stroke();
 
+  // Question at top
   ctx.fillStyle = "#b8b8bd";
   ctx.font =
     "700 27px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
 
-  const questionLines = wrapText(ctx, question, 760).slice(0, 2);
-  let questionY = 205;
+  const questionLines = wrapText(ctx, question, 760).slice(0, 3);
+  const questionStartY = 84;
 
   questionLines.forEach((line, index) => {
-    ctx.fillText(line, 70, questionY + index * 38);
+    ctx.fillText(line, 70, questionStartY + index * 38);
   });
 
-  const redLineY = questionY + questionLines.length * 38 + 30;
-
+  // Red line below question
+  const redLineY = questionStartY + questionLines.length * 38 + 28;
   ctx.fillStyle = "#ff2d55";
   roundRect(ctx, 70, redLineY, 180, 12, 999);
   ctx.fill();
 
+  // Keyword below red line
+  const keywordY = redLineY + 42;
   ctx.fillStyle = "#ffffff";
   ctx.font =
-    "850 50px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+    "950 82px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
+  ctx.fillText(keyword, 70, keywordY);
 
+  // Answer below keyword
+  ctx.font =
+    "850 50px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
   const answerLines = wrapText(ctx, body, 760).slice(0, 6);
+  const answerStartY = keywordY + 110;
   const answerLineHeight = 66;
-  const answerStartY = redLineY + 58;
 
   answerLines.forEach((line, index) => {
     ctx.fillText(line, 70, answerStartY + index * answerLineHeight);
   });
 
+  // Watermark
   ctx.fillStyle = "#8e8e93";
   ctx.font =
     "700 26px -apple-system, BlinkMacSystemFont, Pretendard, Segoe UI, sans-serif";
@@ -284,17 +293,7 @@ function drawKakaoInputBar(ctx: CanvasRenderingContext2D, y: number) {
 export default function MemeActions({ question, answer }: MemeActionsProps) {
   function makePosterImage() {
     const { canvas, ctx } = setupCanvas(900, 900);
-
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, 900, 900);
-
-    ctx.strokeStyle = "rgba(255,255,255,0.18)";
-    ctx.lineWidth = 2;
-    roundRect(ctx, 1, 1, 898, 898, 62);
-    ctx.stroke();
-
-    drawPosterText(ctx, question, answer);
-
+    drawPoster(ctx, question, answer);
     downloadCanvas(canvas, "newmb-poster.png");
   }
 
