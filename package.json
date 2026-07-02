@@ -2,9 +2,8 @@
   "name": "newmb-chat",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "pnpm@9.15.0",
   "engines": {
-    "node": ">=20.0.0"
+    "node": "20.x"
   },
   "scripts": {
     "dev": "next dev",
