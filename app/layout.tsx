@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
@@ -7,6 +8,8 @@ const siteName = "뉴MB.chat";
 const description =
   "뉴MB.chat is an unofficial parody AI inspired by public football interviews and football culture.";
 
+const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -14,9 +17,6 @@ export const metadata: Metadata = {
     template: `%s | ${siteName}`
   },
   description,
-  verification: {
-  google: "gJZXkBfa43qbaWvOPM4eotWxB7k8qTtXBKTrR6X7Kto"
-},
   applicationName: siteName,
   keywords: [
     "뉴MB.chat",
@@ -76,6 +76,16 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
+        {adsenseClient ? (
+          <Script
+            id="google-adsense"
+            async
+            strategy="afterInteractive"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+            crossOrigin="anonymous"
+          />
+        ) : null}
+
         {children}
         <Analytics />
       </body>
