@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 type AdSlotProps = {
   label?: string;
+  client?: string;
+  slot?: string;
 };
 
 declare global {
@@ -12,26 +14,44 @@ declare global {
   }
 }
 
-export default function AdSlot({ label = "Advertisement" }: AdSlotProps) {
-  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
-  const adsenseSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT;
+export default function AdSlot({
+  label = "Advertisement",
+  client = "",
+  slot = ""
+}: AdSlotProps) {
+  const pushedRef = useRef(false);
+
+  const hasClient = client.trim().length > 0;
+  const hasSlot = slot.trim().length > 0;
+  const canRenderAd = hasClient && hasSlot;
 
   useEffect(() => {
-    if (!adsenseClient || !adsenseSlot) return;
+    if (!canRenderAd) return;
+    if (pushedRef.current) return;
 
     try {
       window.adsbygoogle = window.adsbygoogle || [];
       window.adsbygoogle.push({});
+      pushedRef.current = true;
     } catch {
-      // AdSense may not be ready yet. Fail silently.
+      // AdSense can fail silently before approval or while the script is loading.
     }
-  }, [adsenseClient, adsenseSlot]);
+  }, [canRenderAd]);
 
-  if (!adsenseClient || !adsenseSlot) {
+  if (!hasClient) {
     return (
       <aside className="ad-slot" aria-label={label}>
         <span>{label}</span>
-        <div className="ad-placeholder">Ad space</div>
+        <div className="ad-placeholder">AdSense client not configured</div>
+      </aside>
+    );
+  }
+
+  if (!hasSlot) {
+    return (
+      <aside className="ad-slot" aria-label={label}>
+        <span>{label}</span>
+        <div className="ad-placeholder">AdSense slot not configured</div>
       </aside>
     );
   }
@@ -42,9 +62,12 @@ export default function AdSlot({ label = "Advertisement" }: AdSlotProps) {
 
       <ins
         className="adsbygoogle"
-        style={{ display: "block" }}
-        data-ad-client={adsenseClient}
-        data-ad-slot={adsenseSlot}
+        style={{
+          display: "block",
+          minHeight: "90px"
+        }}
+        data-ad-client={client}
+        data-ad-slot={slot}
         data-ad-format="auto"
         data-full-width-responsive="true"
       />
