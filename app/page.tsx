@@ -2,11 +2,17 @@ import Chat from "@/components/Chat";
 import AdSlot from "@/components/AdSlot";
 
 export default function HomePage() {
+  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "";
+  const adsenseSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT || "";
+
   return (
     <main className="page-shell">
       <Chat />
 
-      <AdSlot />
+      <AdSlot
+        client={adsenseClient}
+        slot={adsenseSlot}
+      />
 
       <footer className="footer">
         <p>© 2026 뉴MB.chat</p>
