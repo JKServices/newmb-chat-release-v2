@@ -1,72 +1,113 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Privacy Policy | 뉴MB.chat",
+export const metadata: Metadata = {
+  title: "Privacy Policy",
   description: "Privacy Policy for 뉴MB.chat."
 };
 
 export default function PrivacyPage() {
   return (
     <main className="legal-page">
-      <section className="legal-card">
-        <Link href="/" className="back-link">
+      <article className="legal-card">
+        <a className="back-link" href="/">
           ← Back to 뉴MB.chat
-        </Link>
+        </a>
 
         <h1>Privacy Policy</h1>
 
+        <p>Last updated: July 2, 2026</p>
+
         <p>
-          This Privacy Policy explains how 뉴MB.chat handles information when you
-          use the website.
+          This Privacy Policy explains how 뉴MB.chat collects, uses, and protects
+          information when you use this website.
         </p>
 
-        <h2>Information We Process</h2>
+        <h2>Information we collect</h2>
 
         <p>
-          When you submit a message, the text may be processed in order to
-          generate a response. By default, 뉴MB.chat is designed to avoid
-          requiring user accounts, names, or login information.
+          뉴MB.chat does not require you to create an account. We do not ask for
+          your name, address, payment information, or login credentials.
         </p>
 
-        <h2>No Sale of Personal Information</h2>
-
         <p>
-          We do not sell your personal information.
+          When you submit a question, the text you enter is processed so the
+          site can generate a response. Please do not submit private, sensitive,
+          confidential, or personally identifying information.
         </p>
 
-        <h2>Analytics and Advertising</h2>
-
         <p>
-          The website may use analytics or advertising tools to understand usage
-          and support the service. These third-party services may process
-          technical information such as device type, browser information, general
-          location, page views, and interactions according to their own policies.
+          Basic technical information may be processed automatically, such as IP
+          address, browser type, device information, request time, and pages
+          visited. This information may be used for security, abuse prevention,
+          analytics, debugging, and site operation.
         </p>
 
-        <h2>AI Processing</h2>
+        <h2>AI processing</h2>
 
         <p>
-          If AI functionality is enabled, submitted prompts may be sent to an AI
-          provider to generate a response. Do not submit sensitive personal
-          information, confidential information, passwords, financial details, or
-          private identifying information.
+          Some questions may be processed using third-party AI services, such as
+          OpenAI, to generate responses. Other questions may be answered using
+          local templates without contacting an AI provider.
         </p>
 
-        <h2>Local Storage</h2>
+        <p>
+          Do not enter information that you would not want processed by an
+          external service.
+        </p>
+
+        <h2>Cookies and analytics</h2>
 
         <p>
-          Some features may store small pieces of information in your browser,
-          such as recent generated content or preferences. This information stays
-          on your device unless a future feature clearly states otherwise.
+          뉴MB.chat may use cookies or similar technologies for basic site
+          functionality, analytics, security, advertising, and performance
+          measurement.
+        </p>
+
+        <p>
+          If analytics or advertising tools are enabled, third-party providers
+          may collect or process information according to their own privacy
+          policies.
+        </p>
+
+        <h2>Advertising</h2>
+
+        <p>
+          뉴MB.chat may display advertisements, including ads served by third-party
+          advertising partners such as Google AdSense. These partners may use
+          cookies or similar technologies to show and measure ads.
+        </p>
+
+        <h2>Generated images</h2>
+
+        <p>
+          Meme images are generated in your browser from the question and answer
+          shown on the page. You are responsible for how you save, share, or use
+          generated images.
+        </p>
+
+        <h2>Data retention</h2>
+
+        <p>
+          We do not provide user accounts or long-term personal profiles. Server
+          logs or analytics data may be retained for operational, security, or
+          debugging purposes.
+        </p>
+
+        <h2>Children</h2>
+
+        <p>
+          This site is intended for a general audience and is not directed to
+          children under 13. If you believe a child has provided personal
+          information, please contact us.
         </p>
 
         <h2>Contact</h2>
 
         <p>
-          For privacy-related questions, please contact the site operator through
-          the contact method provided on the website.
+          If you have questions about this Privacy Policy, contact:
+          contact@newmb.chat
         </p>
-      </section>
+      </article>
     </main>
   );
 }
