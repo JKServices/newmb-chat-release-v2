@@ -1,7 +1,7 @@
 export const runtime = "edge";
 
 export function GET() {
-  const publisherId = process.env.GOOGLE_ADSENSE_PUBLISHER_ID;
+  const publisherId = process.env.ca-pub-9600422626092487;
 
   const body = publisherId
     ? `google.com, ${publisherId}, DIRECT, f08c47fec0942fa0\n`
