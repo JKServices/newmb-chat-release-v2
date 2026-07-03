@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     template: `%s | ${siteName}`
   },
   description,
+  verification: {
+  google: "gJZXkBfa43qbaWvOPM4eotWxB7k8qTtXBKTrR6X7Kto"
+},
   applicationName: siteName,
   keywords: [
     "뉴MB.chat",
