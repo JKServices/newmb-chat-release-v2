@@ -11,6 +11,13 @@ type ChatRequest = {
   question?: string;
 };
 
+const allowedHostnames = new Set([
+  "newmb.chat",
+  "www.newmb.chat",
+  "localhost",
+  "127.0.0.1"
+]);
+
 function sanitizeQuestion(value: unknown) {
   if (typeof value !== "string") return "";
 
@@ -59,8 +66,74 @@ function makeRateLimitAnswer(reason?: "hourly" | "burst") {
   ].join("\n");
 }
 
+function isAllowedUrl(value: string | null) {
+  if (!value) return false;
+
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname;
+
+    if (allowedHostnames.has(hostname)) {
+      return true;
+    }
+
+    if (hostname.endsWith(".vercel.app")) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function isAllowedRequestSource(request: Request) {
+  const origin = request.headers.get("origin");
+  const referer = request.headers.get("referer");
+
+  if (isAllowedUrl(origin)) {
+    return true;
+  }
+
+  if (isAllowedUrl(referer)) {
+    return true;
+  }
+
+  return false;
+}
+
+function makeBlockedAnswer() {
+  return [
+    "Review",
+    "",
+    "허용되지 않은 경기장입니다.",
+    "공식 홈구장에서 다시 질문하세요."
+  ].join("\n");
+}
+
+export function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      Allow: "POST, OPTIONS"
+    }
+  });
+}
+
 export async function POST(request: Request) {
   try {
+    if (!isAllowedRequestSource(request)) {
+      return NextResponse.json(
+        {
+          answer: makeBlockedAnswer(),
+          source: "blocked-origin"
+        },
+        {
+          status: 403
+        }
+      );
+    }
+
     const contentType = request.headers.get("content-type") || "";
 
     if (!contentType.includes("application/json")) {
